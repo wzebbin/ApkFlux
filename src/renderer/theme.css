@@ -37,7 +37,7 @@ svg { flex-shrink: 0; vertical-align: middle; }
 .topbar.mac-titlebar { padding-inline-start: 96px; -webkit-app-region: drag; }
 .mac-titlebar .header-right { -webkit-app-region: no-drag; }
 .wordmark { display: flex; align-items: center; gap: 9px; flex-shrink: 0; font-weight: 720; font-size: 17px; letter-spacing: -.35px; }
-.brand-icon { width: 29px; height: 29px; display: grid; place-items: center; border-radius: 7px; background: var(--raised); color: var(--accent); border: 1px solid var(--border); }
+.brand-icon { display: block; flex-shrink: 0; }
 .header-divider { height: 18px; width: 1px; flex-shrink: 0; background: var(--border); }
 .header-caption { color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .header-right { margin-left: auto; display: flex; align-items: center; flex-shrink: 0; gap: 8px; }
@@ -300,7 +300,7 @@ html.light :is(.header-caption,.section-label,.statusbar,.welcome p,.overview p,
 html.light :is(.history-list button:hover,.source-results button:hover) { background: #dce9f4; color: #126754; }
 html.light :is(.dropzone,kbd) { color: #234466; background: #e9f1fb; border-color: #c9dbef; }
 html.light :is(.source-warning,.warnings) { color: #744117; background: #fff2d8; }
-html.light .brand-icon, html.light .drop-icon { background: #dff5ef; color: #126754; border-color: #c9e8e0; }
+html.light .drop-icon { background: #dff5ef; color: #126754; border-color: #c9e8e0; }
 html.light .el-button.open-button { color: #fff; background: #126754; border-color: #126754; }
 html.light .el-button.open-button:not(:disabled):hover { color: #fff; background: #197d67; border-color: #197d67; }
 html.light .history-list button { color: #273d5b; }

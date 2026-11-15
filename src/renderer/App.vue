@@ -2,6 +2,7 @@
 import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { ElButton, ElInput, ElTreeV2 } from 'element-plus'
 import { version } from '../../package.json'
+import appIcon from '../../build/icon.png'
 import type { FileSource, SourceSearch } from '../shared/api'
 import { isNativeLibrary } from '../shared/native-library'
 import Glyph from './UiGlyph.vue'
@@ -287,7 +288,7 @@ onBeforeUnmount(() => { observer.disconnect(); unlisten?.() })
 <template>
   <div class="desktop" @dragenter.prevent="enter" @dragleave.prevent="leave" @dragover.prevent @drop.prevent="drop">
     <header class="topbar" :class="{ 'mac-titlebar': isMac }">
-      <div class="wordmark"><span class="brand-icon"><Glyph name="brand" :size="18" /></span><span>ApkFlux</span></div>
+      <div class="wordmark"><img class="brand-icon" :src="appIcon" width="29" height="29" alt=""><span>ApkFlux</span></div>
       <span class="header-divider" aria-hidden="true"></span>
       <span class="header-caption" :title="displayName">{{ displayName || t('APK 工作台', 'APK Workbench') }}</span>
       <div class="header-right">
