@@ -2,7 +2,7 @@
 
 在「设置 → 外部工具」中查看探测结果，选择自定义路径，或用「重置」恢复自动探测。顺序是自定义、应用内置、已安装 SDK、系统 PATH。配置保存在本地应用数据中的 `tools.json`。
 
-Apple Silicon 1.0.1 本地包内置 JADX、Apktool、ARM64 Java 运行时、AAPT2、zipalign、apksigner 和 ADB。Ghidra 继续使用本地安装。已发布的 1.0.0 和源码开发模式使用本机工具。此时按下列步骤配置。
+Apple Silicon 1.0.1 发布包内置 JADX、Apktool、ARM64 Java 运行时、AAPT2、zipalign、apksigner 和 ADB。Ghidra 继续使用本地安装。1.0.0 和源码开发模式使用本机工具，可按下列步骤配置。
 
 - 安装 Android Studio 的 SDK Manager 或 [Android SDK 命令行工具](https://developer.android.com/tools)。完整 APK 元数据通过 [aapt2 dump badging](https://developer.android.com/tools/aapt2) 解析；证书指纹和签名方案由 [apksigner verify](https://developer.android.com/tools/apksigner) 读取。
 - 设置 `ANDROID_HOME`（也兼容 `ANDROID_SDK_ROOT`）。默认还会扫描 macOS 的 `~/Library/Android/sdk`。按版本从新到旧查找 Build Tools；ADB 从 Platform Tools 查询。

@@ -2,26 +2,24 @@
 
 ApkFlux 是面向 Apple Silicon Mac 的本地 Android APK 工作台。可浏览包内文件、反编译 Java、编辑 Smali 和资源，并将修改构建为新的签名 APK。
 
-[项目官网](https://wzebbin.github.io/ApkFlux/) · [下载 1.0.0 DMG](https://github.com/wzebbin/ApkFlux/releases/download/v1.0.0/ApkFlux-1.0.0-mac-arm64.dmg) · [发布记录](https://github.com/wzebbin/ApkFlux/releases)
+[项目官网](https://wzebbin.github.io/ApkFlux/) · [下载 1.0.1 DMG](https://github.com/wzebbin/ApkFlux/releases/download/v1.0.1/ApkFlux-1.0.1-mac-arm64.dmg) · [发布记录](https://github.com/wzebbin/ApkFlux/releases)
 
-![ApkFlux 1.0.0 工作台，左侧显示文件树，编辑器打开清单、原始资源和 Smali](site/assets/workbench.png)
+![ApkFlux 1.0.1 工作台，左侧显示文件树，编辑器打开清单、原始资源和 Smali](site/assets/workbench.png)
 
-*1.0.0 工作台 · 示例 APK*
+*1.0.1 工作台 · 示例 APK*
 
 ## 安装
 
-1. 下载 **1.0.0 Apple Silicon DMG（约 125 MB）**和 [SHA-256 校验文件](https://github.com/wzebbin/ApkFlux/releases/download/v1.0.0/SHA256SUMS.txt)。在下载目录运行 `shasum -a 256 -c SHA256SUMS.txt` 可校验 DMG。
+1. 下载 **1.0.1 Apple Silicon DMG（约 285 MB）**和 [SHA-256 校验文件](https://github.com/wzebbin/ApkFlux/releases/download/v1.0.1/SHA256SUMS.txt)。在下载目录运行 `shasum -a 256 -c SHA256SUMS.txt` 可校验 DMG。
 2. 打开 DMG，将 ApkFlux 拖到「应用程序」。免费发布版使用临时签名，首次打开可能出现开发者验证提示。[Apple 的打开说明](https://support.apple.com/zh-cn/102445)
 3. 在「设置 → 应用更新 → 查看 GitHub 发布」可获取新版。退出应用后，用新 DMG 中的 ApkFlux 替换旧应用。工作区保存在独立的应用数据目录。
 
-公开下载的 **1.0.0** 使用本机工具。Java 反编译需要 JDK 和 JADX，查看二进制清单、解码 Smali 需要 JDK 和 Apktool，完整包信息、验签和重建需要 Android SDK Build Tools。连接设备需要 ADB。可在「设置 → 外部工具」查看和配置。[工具配置步骤](docs/tools.md)
-
-源码当前对应 **1.0.1 本地验收版**。本地打包会附带 ARM64 Java、JADX、Apktool、AAPT2、zipalign、apksigner 和 ADB。SO 分析按需配置 Ghidra。[内置工具说明](docs/bundled-tools.md)
+**1.0.1** 内置 ARM64 Java、JADX、Apktool、AAPT2、zipalign、apksigner 和 ADB。安装后可以直接反编译、解码、重建和验签。在「设置 → 外部工具」可查看版本或指定工具路径。SO 分析按需配置 Ghidra。[内置工具说明](docs/bundled-tools.md) · [工具配置步骤](docs/tools.md)
 
 ## 第一次打开 APK
 
 1. 点击「导入 APK」、按 ⌘O 或拖入 APK。ApkFlux 将 APK 复制到本地工作区，原始文件保持不变。
-2. 在「文件」页浏览「原始 APK」，或者点击「查看清单」。配置 Apktool 后可以读取二进制清单，完成 Smali 解码后可通过同一入口编辑工作副本。
+2. 在「文件」页浏览「原始 APK」，或点击「查看清单」读取二进制清单。完成 Smali 解码后，可通过同一入口编辑工作副本。
 3. 在「反编译 Java」或「Smali / 资源」中点击「开始反编译」或「开始解码」。结果生成后会显示文件树，编辑器标签会标注来源。
 
 ## 功能
