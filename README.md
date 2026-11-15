@@ -19,6 +19,8 @@ npm run dev
 
 已构建的版本可以用 `npm run build` 后执行 `npm start`。首次启动开发版时，Electron 可能需要下载本机运行时；可提前运行 `npm exec -- install-electron`。
 
+在 Apple Silicon Mac 上运行 `npm run dist:mac` 即可本地生成 DMG，输出到 `release/`。发布使用本地验收后的包。[构建与发布步骤](docs/build.md)
+
 从标题栏、快捷键 ⌘O 或文件拖放导入一个 APK。左侧可按文件路径筛选，中央用 Monaco 只读预览 UTF-8 文本，也可查看常见位图。打开「APK 信息」可查看元数据、DEX 数量、`lib/<ABI>/` 中的架构、签名及 SHA-256。底部状态栏显示任务状态并提供取消入口，点击「日志」可查看任务详情。
 
 完整元数据和签名验证依赖 [Android SDK Build Tools](https://developer.android.com/tools/releases/build-tools) 中的 `aapt2`、`apksigner`，以及适配 SDK 的 JDK。工作台会自动寻找，也可在「设置 → 外部工具」指定路径。缺少这些工具时仍能查看 APK 内容、大小、SHA-256、DEX 和 ABI，并会明确标出未取得的信息。工具补齐后重新导入同一 APK 可补全字段。请参阅[外部工具](docs/tools.md)。

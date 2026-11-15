@@ -51,4 +51,17 @@ npm run dist:mac
 
 官网使用 GitHub Pages。仓库的 Pages 发布源设为 GitHub Actions 后，`main` 上的官网变更由 `pages.yml` 部署至 [ApkFlux 官网](https://wzebbin.github.io/ApkFlux/)。
 
-推送与项目版本一致的 `vX.Y.Z` 标签后，发布工作流在 macOS arm64 runner 上执行检查和构建。工作流验证 DMG、应用临时签名、版本与架构，然后附上 `SHA256SUMS.txt` 发布至 GitHub Releases。发布说明来自 `docs/github-release.md`，版本变更时同步更新说明。Apple Silicon 免费分发使用临时签名，无 Apple 公证。用户从「设置 → 应用更新」进入 GitHub Releases 手动安装新版本。
+安装包在 Apple Silicon Mac 上本地构建与验收。准备 Node.js 24 LTS，更新版本号和发布说明后执行：
+
+```sh
+npm ci
+npm run lint
+npm run typecheck
+npm test
+npm run dist:mac
+version=$(node -p "require('./package.json').version")
+(cd release && hdiutil verify "ApkFlux-$version-mac-arm64.dmg" &&
+  shasum -a 256 "ApkFlux-$version-mac-arm64.dmg" > SHA256SUMS.txt)
+```
+
+挂载 DMG，确认应用版本及 arm64 架构，并验证安装和启动。将对应源码提交和版本标签推送到 GitHub，在 Releases 上传本地生成的 DMG 与 `SHA256SUMS.txt`，使用 `docs/github-release.md` 中的说明发布。官网的下载按钮指向最新发布。Apple Silicon 免费分发使用临时签名，无 Apple 公证。用户从「设置 → 应用更新」进入 GitHub Releases 手动安装新版本。
