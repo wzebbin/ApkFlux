@@ -1,0 +1,17 @@
+node_modules/
+dist/
+release/
+coverage/
+.DS_Store
+*.log
+test-output/
+
+.local-tools/
+
+*.apk
+*.idsig
+*.p12
+*.pfx
+*.p8
+.env
+.env.*
