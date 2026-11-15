@@ -33,6 +33,7 @@ const api: DesktopApi = {
   analyzeNative: (id, path) => ipcRenderer.invoke(channels.analyzeNative, id, path),
   nativeCode: (id, path, address) => ipcRenderer.invoke(channels.nativeCode, id, path, address),
   updateState: () => ipcRenderer.invoke(channels.updateState),
+  openReleases: () => ipcRenderer.invoke(channels.openReleases),
   checkUpdate: () => ipcRenderer.invoke(channels.checkUpdate),
   downloadUpdate: () => ipcRenderer.invoke(channels.downloadUpdate),
   applyUpdate: () => ipcRenderer.invoke(channels.applyUpdate),

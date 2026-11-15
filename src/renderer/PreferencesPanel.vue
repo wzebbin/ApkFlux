@@ -10,7 +10,7 @@ const status = ref<UpdateState>()
 const busy = ref(false)
 const error = ref('')
 const messages: Record<UpdateState['status'], [string, string]> = {
-  unconfigured: ['此构建未配置更新源。', 'This build has no update feed.'],
+  unconfigured: ['在 GitHub 查看并手动安装新版本。', 'View and install new versions manually from GitHub.'],
   idle: ['等待检查。', 'Ready to check.'],
   checking: ['正在检查更新…', 'Checking for updates…'],
   available: ['有新版本。', 'An update is available.'],
@@ -32,6 +32,11 @@ async function install() {
   const result = await window.apkflux.applyUpdate()
   if (!result.ok) error.value = result.error
 }
+async function openReleases() {
+  error.value = ''
+  const result = await api.openReleases()
+  if (!result.ok) error.value = result.error
+}
 const api = window.apkflux
 onMounted(() => run(api.updateState))
 </script>
@@ -50,7 +55,8 @@ onMounted(() => run(api.updateState))
     <h3>{{ t('应用更新', 'App updates') }}</h3>
     <p v-if="status">{{ t(...messages[status.status]) }} {{ status.version }}</p>
     <div v-if="error" class="error-banner" role="alert">{{ error }}</div>
-    <ElButton :disabled="busy || status?.status === 'unconfigured'" @click="run(api.checkUpdate)">{{ t('检查更新', 'Check for updates') }}</ElButton>
+    <ElButton v-if="status?.status === 'unconfigured'" @click="openReleases">{{ t('查看 GitHub 发布', 'View GitHub Releases') }}</ElButton>
+    <ElButton v-else :disabled="busy" @click="run(api.checkUpdate)">{{ t('检查更新', 'Check for updates') }}</ElButton>
     <ElButton v-if="status?.status === 'available'" :disabled="busy" @click="run(api.downloadUpdate)">{{ t('下载更新', 'Download update') }}</ElButton>
     <ElButton v-if="status?.status === 'ready'" :disabled="busy" @click="install">{{ t('安装更新并重启', 'Install and restart') }}</ElButton>
     <slot />

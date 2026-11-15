@@ -103,6 +103,7 @@ export interface DesktopApi {
   analyzeNative(id: string, path: string): Promise<Reply<NativeLibrary>>
   nativeCode(id: string, path: string, address: string): Promise<Reply<NativeCode>>
   updateState(): Promise<Reply<UpdateState>>
+  openReleases(): Promise<Reply<void>>
   checkUpdate(): Promise<Reply<UpdateState>>
   downloadUpdate(): Promise<Reply<UpdateState>>
   applyUpdate(): Promise<Reply<void>>
@@ -127,7 +128,8 @@ export const channels = {
   buildHistory: 'build:history', devices: 'adb:devices', installBuild: 'adb:install',
   analyze: 'analysis:run', exportAnalysis: 'analysis:export',
   analyzeNative: 'native:analyze', nativeCode: 'native:code',
-  updateState: 'update:state', checkUpdate: 'update:check', downloadUpdate: 'update:download', applyUpdate: 'update:apply',
+  updateState: 'update:state', openReleases: 'update:open-releases',
+  checkUpdate: 'update:check', downloadUpdate: 'update:download', applyUpdate: 'update:apply',
   manageDevice: 'adb:manage',
   copyHash: 'workspace:copy-hash', cancel: 'task:cancel', task: 'task:event', openRequest: 'ui:open-request',
 } as const

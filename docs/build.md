@@ -30,11 +30,11 @@ npm run build
 npm run test:stress
 ```
 
-设置 `APKFLUX_TEST_ELECTRON` 可使用 Apple Silicon 打包版复验。
+设置 `APKFLUX_TEST_ELECTRON` 可使用 Apple Silicon 打包版复验。若工具未被自动探测，可通过 `APKFLUX_TEST_JADX` 和 `APKFLUX_TEST_APKTOOL` 指定路径。
 
 反编译验收需要 JADX 1.5.6、Apktool 3.0.3 和 JDK。生成测试 APK 后运行 `npm run test:decode`。测试使用已探测的工具，或通过 `APKFLUX_TEST_JADX` 和 `APKFLUX_TEST_APKTOOL` 指定本地路径。针对其他 APK，可设置 `APKFLUX_TEST_APK`、`APKFLUX_TEST_JAVA_PATH`、`APKFLUX_TEST_SMALI_PATH`、`APKFLUX_TEST_CLASS` 和 `APKFLUX_TEST_PACKAGE` 验收指定的输出。测试用临时数据目录验证界面预览、内容搜索、导出和缓存恢复。
 
-[electron-builder](https://www.electron.build/docs/cli/) 当前生成 Apple Silicon macOS 的 DMG 和 ZIP：
+[electron-builder](https://www.electron.build/docs/cli/) 当前生成 Apple Silicon macOS 的 DMG：
 
 ```sh
 npm run package:dir
@@ -45,19 +45,10 @@ npm run dist:mac
 
 常规打包使用外部工具。本地离线验收包通过 electron-builder 的 `extraResources` 将工具 JAR 放进 `tools/<platform>-<arch>/`。JDK 和 Android SDK 保持由本机配置。可参考[外部工具](tools.md)。
 
-更新检查、下载和安装使用 [electron-updater](https://www.electron.build/docs/features/auto-update/)。正式分发时，通过 electron-builder 的 `publish` 设置注入更新源，签名并生成安装包与更新元数据。将元数据和产物发布到配置的服务后，才能从旧签名版本验收更新。无更新源的本地验收包会在设置页显示状态。本地 macOS 包使用临时开发签名。请在正式发布前复核 [Electron 支持周期](https://releases.electronjs.org/schedule)。
-
-
 `npm run test:native` 验证真实 SO 的反汇编和伪代码。用 `APKFLUX_TEST_GHIDRA` 指定已编译原生组件的本地安装，`APKFLUX_TEST_APK` 指定 APK，`APKFLUX_TEST_SO` 和 `APKFLUX_TEST_FUNCTION` 可指定 AArch64 条目和函数地址。
-
-## V1.0 发布验收
-
-0.5.2 是 Apple Silicon macOS 本地验收版本。用干净账户安装，逐项检查导入、工具探测、双语与主题、反编译、搜索、编辑、构建签名和卸载。Ghidra 单独记录可用的 Java、引擎版本和目标主机。记录原始 APK 哈希、工具版本及安装包哈希，使用自有夹具复验大 APK 和取消后的清理。
-
-比较内置 JADX、Apktool 加外部 JDK 的当前打包方式，与独立带 JRE 的安装体积、许可证和首次启动体验。发布前记录所需的 JDK、Android SDK 和 Ghidra 安装方式。正式包需要 macOS 分发签名、公证和可访问的更新源。完成一次已签名旧版本的检查、下载、重启安装，并复核工作区缓存、已保存副本和工具配置在升级后可读。
 
 ## GitHub 发布
 
 官网使用 GitHub Pages。仓库的 Pages 发布源设为 GitHub Actions 后，`main` 上的官网变更由 `pages.yml` 部署至 [ApkFlux 官网](https://wzebbin.github.io/ApkFlux/)。
 
-在 GitHub 的 `macos-release` 环境里设置 `CSC_LINK`、`CSC_KEY_PASSWORD`、`APPLE_API_KEY_BASE64`、`APPLE_API_KEY_ID` 和 `APPLE_API_ISSUER`。证书为带私钥的 Developer ID Application PKCS#12，公证密钥为 App Store Connect API 私钥。推送与项目版本一致的 `vX.Y.Z` 标签后，工作流在 arm64 runner 上生成签名、公证的 DMG 和 ZIP，并附上 `latest-mac.yml` 更新元数据。复核 GitHub Release 草稿和产物后再发布。
+推送与项目版本一致的 `vX.Y.Z` 标签后，发布工作流在 macOS arm64 runner 上执行检查和构建。工作流验证 DMG、应用临时签名、版本与架构，然后附上 `SHA256SUMS.txt` 发布至 GitHub Releases。发布说明来自 `docs/github-release.md`，版本变更时同步更新说明。Apple Silicon 免费分发使用临时签名，无 Apple 公证。用户从「设置 → 应用更新」进入 GitHub Releases 手动安装新版本。

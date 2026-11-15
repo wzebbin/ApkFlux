@@ -1,10 +1,14 @@
 # ApkFlux
 
-ApkFlux 是本地运行的 Android APK 工作台。当前验收版本 `0.5.2` 面向 Apple Silicon macOS，支持导入、反编译、工作副本编辑、重建签名和本地版本对比。
+ApkFlux 是本地运行的 Android APK 工作台。当前版本 `1.0.0` 面向 Apple Silicon macOS，支持导入、反编译、工作副本编辑、重建签名和本地版本对比。
 
 [项目官网](https://wzebbin.github.io/ApkFlux/) · [GitHub Releases](https://github.com/wzebbin/ApkFlux/releases)
 
-## 启动
+## 安装
+
+从 [GitHub Releases](https://github.com/wzebbin/ApkFlux/releases/latest) 下载 Apple Silicon DMG 和 SHA-256 校验文件。打开 DMG，将 ApkFlux 拖到「应用程序」。发布版使用临时签名，首次打开时 macOS 可能提示开发者无法验证。请参阅 [Apple 的说明](https://support.apple.com/zh-cn/102445)。后续版本可在「设置 → 应用更新」打开 GitHub 发布页，下载 DMG 手动替换。
+
+## 从源码启动
 
 准备 Node.js 22.12+（推荐 Node.js 24 LTS）和 npm：
 
@@ -21,7 +25,7 @@ npm run dev
 
 导入后，在「文件」页左侧切换「原始 APK」「反编译 Java」和「Smali / 资源」。首次打开反编译视图时，可在该视图中启动对应的工具。打开文件时，编辑器标签会显示文件来源。导入后即可在 APK 文件树点击 `AndroidManifest.xml`，或点击「查看清单」打开只读预览。完成 Smali / 资源解码后，同一入口可打开可编辑的工作副本。Java 和原始 APK 条目以只读方式打开。解码后的 Smali、清单和文本资源可在 Monaco 中编辑。反编译视图支持按路径筛选或搜索文件内容，Java 结果可导出到所选目录。反编译使用后台任务，底部显示日志，也可取消。结果按 APK 的 SHA-256 缓存，重开历史工作区即可继续查看。
 
-常规源码构建使用本机的 JADX 和 Apktool，可通过「外部工具」选择。本地打包版包含两个工具的 JAR，运行仍需要 JDK。详见[外部工具](docs/tools.md)。
+常规源码构建使用本机的 JADX 和 Apktool，可通过「外部工具」选择。GitHub 发布包使用外部工具，运行 JADX 和 Apktool 需要本机 JDK。详见[外部工具](docs/tools.md)。
 
 资源管理器右上角的「全局搜索」同时查询原始 APK 和已生成视图的路径，以及 Java、Smali 和解码资源中的文本。尚未生成的视图会在搜索结果中单独提示。点击命中项会打开对应来源的标签并定位到文件树或匹配行。
 
@@ -49,4 +53,4 @@ npm run test:stress
 
 `npm run fixture` 需要 Android SDK Platform、Build Tools 和 JDK，并在 `test-output/` 生成可复现验收流程所需的真实签名 APK（每次都会重新生成测试证书）。桌面测试需要图形会话。参阅[构建与验收](docs/build.md)。
 
-当前提供本地验收包。正式平台签名、发布服务与更新验收状态见[开发进度](docs/progress.md)。[架构](docs/architecture.md) · [开发计划](docs/development-plan.md) · [进度](docs/progress.md) · [变更记录](docs/changelog.md)
+[架构](docs/architecture.md) · [开发计划](docs/development-plan.md) · [进度](docs/progress.md) · [变更记录](docs/changelog.md)

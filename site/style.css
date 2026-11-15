@@ -24,6 +24,7 @@ h1 { font-size: clamp(39px, 5vw, 72px); line-height: 1.12; letter-spacing: -.045
 .summary { max-width: 32em; margin: 23px 0; color: var(--muted); line-height: 1.75; }
 .download { display: inline-flex; align-items: center; min-height: 46px; padding: 0 19px; border-radius: 6px; background: var(--accent); color: #12241e; font-weight: 700; }
 .download:hover { background: #b5eedc; }
+.install-note { margin: 12px 0 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
 .preview { margin: 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; box-shadow: 0 16px 45px #090d1466; }
 .preview img { width: 100%; height: auto; display: block; }
 .features { border-top: 1px solid var(--border); padding-block: 36px 48px; }

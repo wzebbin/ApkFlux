@@ -1,4 +1,4 @@
-import { app, BrowserWindow, clipboard, dialog, ipcMain, Menu, type IpcMainInvokeEvent, type MenuItemConstructorOptions } from 'electron'
+import { app, BrowserWindow, clipboard, dialog, ipcMain, Menu, shell, type IpcMainInvokeEvent, type MenuItemConstructorOptions } from 'electron'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { basename, join } from 'node:path'
 import { pathToFileURL } from 'node:url'
@@ -224,6 +224,7 @@ function registerIpc(workspaces: Workspaces, tools: Tools, decoder: Decoder, bui
     return result.filePath
   })
   handle(channels.updateState, () => updates.current())
+  handle(channels.openReleases, () => shell.openExternal('https://github.com/wzebbin/ApkFlux/releases/latest'))
   handle(channels.checkUpdate, () => updates.check())
   handle(channels.downloadUpdate, () => updates.download())
   handle(channels.applyUpdate, () => {

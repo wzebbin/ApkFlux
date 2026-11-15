@@ -1,6 +1,6 @@
 # 开发进度
 
-更新于 2026-11-15。当前本地验收版本 `0.5.2`，V1.0 仅面向 Apple Silicon macOS。
+更新于 2026-11-15。当前发布版本 `1.0.0`，V1.0 仅面向 Apple Silicon macOS。
 
 ## V1.0 收尾工作
 
@@ -10,7 +10,7 @@
 | 分析与对比 | 对比页显示两侧解码覆盖情况，支持代码、资源和 SO 分类筛选，解码资源按内容哈希参与。已用签名测试 APK 的两个版本验证 PNG 和清单变化、权限以及三种报告导出。另用真实 APK 和其已有重建副本验证 SO 列表（当前侧 16 项）及 SDK 对比入口。 | 用含实际 SO 和 SDK 增删的第二组版本验收增删结果。 |
 | 性能与清理 | 打包版导入 256.27 MiB 测试 APK 用时 2.64 秒，期间绘制 163 帧。四轮各打开、关闭 24 个标签，切换 P95 为 28 毫秒，回收后 JS 堆为 17.59、17.94、18.33、18.45 MiB。重启后清除并重新生成过期 Java 缓存，原始 APK、工作区快照及已保存的清单修改校验一致。 | 更长会话的内存趋势。 |
 | Apple Silicon 验收 | 0.5.0 已完成桌面回归和真实 SO 的 Ghidra 验收。0.5.1 移除 AI 服务，并将默认构建目标收窄到 macOS arm64。 | 继续 Apple Silicon 的安装、语言、主题和工具组合验收。 |
-| 发布 | 官网使用 GitHub Pages，正式包的更新源为 GitHub Releases，已配置 Apple Silicon 发布工作流。 | 配置 Apple Developer ID 和公证凭证后，验收从已签名旧版升级。 |
+| 发布 | 官网使用 GitHub Pages，Apple Silicon DMG 和校验文件通过 GitHub Releases 免费分发。 | 后续版本在应用设置中打开 GitHub 发布页，手动下载和安装。 |
 
 Windows x64 与 Intel Mac 的 0.5.0 安装包作为历史验收件保留。AI 相关条目仅记录旧版本历史。
 
@@ -26,7 +26,7 @@ Windows x64 与 Intel Mac 的 0.5.0 安装包作为历史验收件保留。AI �
 | 7 · AI 辅助 | 自定义兼容聊天接口、模型与安全密钥存储。由用户选定发送文本，支持流式回复和取消。 | 本机测试服务曾通过流式和取消测试。功能在 0.5.1 移除。 |
 | 8 · 发布 | 本地图标、深浅主题、主要界面的中英文切换、ADB 设备操作、更新入口和平台打包。 | 已生成 Apple Silicon 与 Intel Mac 的 DMG / ZIP 及 Windows x64 的 NSIS 安装包。Apple Silicon 完成桌面回归，Intel 版曾在 Rosetta 下通过导入和反编译测试。生产签名、Apple 公证和在线更新仍需发布环境。 |
 
-本轮通过 ESLint、严格 TypeScript 检查、9 项单元测试和 5 项桌面测试和 Vite 生产构建。详细构建命令及验收变量见 [构建与验收](build.md)。
+1.0.0 通过 ESLint、严格 TypeScript 检查、9 项单元测试、Vite 生产构建和 5 项桌面测试。已挂载并校验 DMG，也验证 0.5.2 换装为 1.0.0 后，历史工作区和修改后的清单可继续打开，原始 APK 的 SHA-256 一致。详细构建命令及验收变量见 [构建与验收](build.md)。
 
 
 Ghidra 12.2 已在 Apple Silicon macOS 上接入并验收。使用实际 APK 内的 AArch64 库验证函数索引、反汇编、C 风格伪代码及重启后的缓存。原始 APK 的 SHA-256 校验一致。已构建并校验 0.4.0 Apple Silicon DMG，本轮 Ghidra 回归范围为 Apple Silicon。

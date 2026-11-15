@@ -84,6 +84,18 @@ test('desktop opens, imports a signed APK, renders Monaco, handles drops and rem
     await page.getByRole('button', { name: '关闭 APK 信息' }).click()
     await inspector.waitFor({ state: 'hidden' })
     await page.getByRole('button', { name: '设置', exact: true }).click()
+    const updateState = await page.evaluate(() => window.apkflux.updateState())
+    if (updateState.ok && updateState.data.status === 'unconfigured') {
+      await app.evaluate(({ shell }) => {
+        const original = shell.openExternal
+        shell.openExternal = async (url) => {
+          global.apkfluxTestReleaseUrl = url
+          shell.openExternal = original
+        }
+      })
+      await page.getByRole('button', { name: '查看 GitHub 发布', exact: true }).click()
+      assert.equal(await app.evaluate(() => global.apkfluxTestReleaseUrl), 'https://github.com/wzebbin/ApkFlux/releases/latest')
+    }
     await page.getByLabel('Language').selectOption('en')
     await page.getByRole('button', { name: 'Back to workbench', exact: true }).click()
     await page.getByRole('button', { name: 'Original APK view' }).waitFor()

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { ElButton, ElInput, ElTreeV2 } from 'element-plus'
+import { version } from '../../package.json'
 import type { FileSource, SourceSearch } from '../shared/api'
 import { isNativeLibrary } from '../shared/native-library'
 import Glyph from './UiGlyph.vue'
@@ -641,7 +642,7 @@ onBeforeUnmount(() => { observer.disconnect(); unlisten?.() })
           :aria-label="logOpen ? t('收起面板', 'Collapse panel') : t('展开面板', 'Expand panel')" :aria-expanded="logOpen" aria-controls="workbench-output"
           @click="logOpen = !logOpen"><Glyph name="down" :size="15" /></button>
         <span v-if="store.workspace" class="status-apk" :title="store.workspace.name">{{ store.workspace.name }}</span>
-        <span class="status-right">{{ t('本地处理', 'Local processing') }} <b>v0.5.2</b></span>
+        <span class="status-right">{{ t('本地处理', 'Local processing') }} <b>v{{ version }}</b></span>
       </footer>
     </section>
     <div v-if="dragDepth > 0" class="drag-overlay"><span><Glyph name="upload" :size="30" /> 松开以导入 APK</span></div>

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
 import { createReadStream } from 'node:fs'
-import { mkdtemp, readFile, rm, stat, utimes } from 'node:fs/promises'
+import { mkdtemp, readFile, rm, stat, utimes, writeFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
 import { tmpdir } from 'node:os'
 import { test } from 'node:test'
@@ -99,6 +99,12 @@ test('startup expires stale Java while the original APK and saved Android edits 
   const apk = resolve('test-output/sample.apk')
   const id = await digest(apk)
   await runDesktop(async ({ profile, launch, choose, close }) => {
+    const { APKFLUX_TEST_JADX, APKFLUX_TEST_APKTOOL } = process.env
+    const tools = {
+      ...(APKFLUX_TEST_JADX ? { jadx: resolve(APKFLUX_TEST_JADX) } : {}),
+      ...(APKFLUX_TEST_APKTOOL ? { apktool: resolve(APKFLUX_TEST_APKTOOL) } : {}),
+    }
+    if (Object.keys(tools).length) await writeFile(join(profile, 'tools.json'), JSON.stringify(tools))
     const cache = join(profile, 'decompiled-v1', id)
     const source = join(profile, 'workspaces', id, 'source.apk')
     const edit = join(cache, 'edits', createHash('sha256').update('AndroidManifest.xml').digest('hex') + '.json')
