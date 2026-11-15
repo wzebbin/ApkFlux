@@ -43,7 +43,9 @@ npm run dist:mac
 
 `npm run test:edit` 验证解码文件编辑、撤销与重做、差异及关闭保护。设置 `APKFLUX_TEST_BUILD=1` 可用临时签名密钥重建并比较两份 APK。测试夹具可配合隔离的 Android 模拟器，通过 `APKFLUX_TEST_INSTALL_TO` 指定设备序列号以使用安装、启动和卸载操作。
 
-常规打包使用外部工具。本地离线验收包通过 electron-builder 的 `extraResources` 将工具 JAR 放进 `tools/<platform>-<arch>/`。JDK 和 Android SDK 保持由本机配置。可参考[外部工具](tools.md)。
+从 1.0.1 起，Apple Silicon 打包会在 `Contents/Resources/tools/darwin-arm64/` 装入已校验的 Temurin ARM64 JRE、JADX 和 Apktool，以及本机 SDK 中的 AAPT2、zipalign、apksigner 与 ADB。构建机需要通过 Android SDK Manager 安装 Build Tools 37.0.0 和 Platform Tools。可用 `ANDROID_SDK_ROOT` 或 `ANDROID_HOME` 指定 SDK。首次构建下载固定版本的 Java 和 JAR，随后复用 `.local-tools/vendor/` 缓存。详细版本、许可证和来源见[内置工具](bundled-tools.md)。
+
+运行打包版桌面验收时，可设置 `APKFLUX_TEST_BUNDLED=1`，检查七个工具均来自应用资源目录，并能运行版本探测。
 
 `npm run test:native` 验证真实 SO 的反汇编和伪代码。用 `APKFLUX_TEST_GHIDRA` 指定已编译原生组件的本地安装，`APKFLUX_TEST_APK` 指定 APK，`APKFLUX_TEST_SO` 和 `APKFLUX_TEST_FUNCTION` 可指定 AArch64 条目和函数地址。
 

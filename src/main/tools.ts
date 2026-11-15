@@ -12,6 +12,11 @@ type Tool = { path: string; source: Source; command: string; prefix: string[] }
 type Result = { code: number; stdout: string; stderr: string }
 type RunOptions = { cwd: string; env?: NodeJS.ProcessEnv; onOutput: (line: string) => void }
 const windows = process.platform === 'win32'
+function executablePaths(name: string) {
+  const paths = (process.env.PATH || '').split(delimiter)
+  if (!windows) paths.push('/opt/homebrew/bin', '/usr/local/bin', '/usr/bin')
+  return paths.filter(isAbsolute).map(dir => join(dir, name))
+}
 const versionArgs: Record<ToolName, string[]> = {
   java: ['-version'], aapt2: ['version'], apksigner: ['version'], zipalign: ['-h'],
   adb: ['version'], jadx: ['--version'], apktool: ['--version'], ghidra: [],
@@ -152,6 +157,7 @@ export class Tools {
       ...[process.env.GHIDRA_JAVA_HOME, process.env.JAVA_HOME].flatMap((home) => home && isAbsolute(home) ? [join(home, 'bin', executable)] : []),
       ...(configured ? [configured.command] : []),
       ...(process.platform === 'darwin' ? ['/opt/homebrew/opt/openjdk/bin/java', '/usr/local/opt/openjdk/bin/java'] : []),
+      ...executablePaths(executable),
     ]
     for (const path of new Set(candidates)) {
       signal?.throwIfAborted()
@@ -208,24 +214,27 @@ export class Tools {
   }
 
   private async sdkCandidates(name: ToolName) {
+    const bundledSdk = join(this.bundled, 'sdk')
     const roots = [...new Set([
+      bundledSdk,
       process.env.ANDROID_SDK_ROOT, process.env.ANDROID_HOME,
       process.platform === 'darwin' ? join(homedir(), 'Library', 'Android', 'sdk')
         : windows ? join(process.env.LOCALAPPDATA || join(homedir(), 'AppData', 'Local'), 'Android', 'Sdk')
           : join(homedir(), 'Android', 'Sdk'),
     ].filter((root): root is string => Boolean(root && isAbsolute(root))))]
-    const paths: string[] = []
+    const paths: [string, Source][] = []
     for (const root of roots) {
-      if (name === 'adb') paths.push(join(root, 'platform-tools', windows ? 'adb.exe' : 'adb'))
+      const source = root === bundledSdk ? 'bundled' : 'sdk'
+      if (name === 'adb') paths.push([join(root, 'platform-tools', windows ? 'adb.exe' : 'adb'), source])
       if (!['apksigner', 'aapt2', 'zipalign'].includes(name)) continue
       const dir = join(root, 'build-tools')
       const versions = await readdir(dir).catch(() => [])
       versions.sort((a, b) => Number(/^[\d.]+$/.test(b)) - Number(/^[\d.]+$/.test(a)) || b.localeCompare(a, 'en', { numeric: true }))
       for (const version of versions) {
         if (name === 'apksigner') {
-          paths.push(join(dir, version, 'lib', 'apksigner.jar'))
-          if (!windows) paths.push(join(dir, version, name))
-        } else paths.push(join(dir, version, name + (windows ? '.exe' : '')))
+          paths.push([join(dir, version, 'lib', 'apksigner.jar'), source])
+          if (!windows) paths.push([join(dir, version, name), source])
+        } else paths.push([join(dir, version, name + (windows ? '.exe' : '')), source])
       }
     }
     return paths
@@ -240,11 +249,10 @@ export class Tools {
     }
     const executable = name + (windows ? '.exe' : '')
     const candidates: [string, Source][] = [[join(this.bundled, executable), 'bundled'], [join(this.bundled, name + '.jar'), 'bundled']]
+    if (name === 'java') candidates.push([join(this.bundled, 'runtime', 'bin', executable), 'bundled'])
     if (name === 'java' && process.env.JAVA_HOME && isAbsolute(process.env.JAVA_HOME)) candidates.push([join(process.env.JAVA_HOME, 'bin', executable), 'sdk'])
-    for (const path of await this.sdkCandidates(name)) candidates.push([path, 'sdk'])
-    const searchPaths = (process.env.PATH || '').split(delimiter)
-    if (!windows) searchPaths.push('/opt/homebrew/bin', '/usr/local/bin', '/usr/bin')
-    for (const dir of searchPaths.filter(isAbsolute)) candidates.push([join(dir, executable), 'path'])
+    candidates.push(...await this.sdkCandidates(name))
+    for (const path of executablePaths(executable)) candidates.push([path, 'path'])
     for (const [path, source] of candidates) {
       const tool = await this.command(name, path, source)
       if (tool) return tool

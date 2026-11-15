@@ -1,5 +1,10 @@
 # 变更记录
 
+## 1.0.1 · Apple Silicon 本地验收
+
+- 安装包内置 ARM64 Java 运行时、JADX、Apktool、AAPT2、zipalign、apksigner 和 ADB。
+- 设置中可查看工具来源，手动配置优先于内置版本。
+
 ## 1.0.0 · Apple Silicon
 
 - 通过 GitHub Releases 提供免费 DMG 和 SHA-256 文件，使用临时签名。

@@ -1,6 +1,6 @@
 # ApkFlux
 
-ApkFlux 是本地运行的 Android APK 工作台。当前版本 `1.0.0` 面向 Apple Silicon macOS，支持导入、反编译、工作副本编辑、重建签名和本地版本对比。
+ApkFlux 是本地运行的 Android APK 工作台。面向 Apple Silicon macOS，支持导入、反编译、工作副本编辑、重建签名和本地版本对比。
 
 [项目官网](https://wzebbin.github.io/ApkFlux/) · [GitHub Releases](https://github.com/wzebbin/ApkFlux/releases)
 
@@ -23,11 +23,11 @@ npm run dev
 
 从标题栏、快捷键 ⌘O 或文件拖放导入一个 APK。左侧可按文件路径筛选，中央用 Monaco 只读预览 UTF-8 文本，也可查看常见位图。打开「APK 信息」可查看元数据、DEX 数量、`lib/<ABI>/` 中的架构、签名及 SHA-256。底部状态栏显示任务状态并提供取消入口，点击「日志」可查看任务详情。
 
-完整元数据和签名验证依赖 [Android SDK Build Tools](https://developer.android.com/tools/releases/build-tools) 中的 `aapt2`、`apksigner`，以及适配 SDK 的 JDK。工作台会自动寻找，也可在「设置 → 外部工具」指定路径。缺少这些工具时仍能查看 APK 内容、大小、SHA-256、DEX 和 ABI，并会明确标出未取得的信息。工具补齐后重新导入同一 APK 可补全字段。请参阅[外部工具](docs/tools.md)。
+完整元数据和验签依赖 `aapt2` 和 `apksigner`。工具按「手动配置、内置工具、本机安装」的顺序查找。缺少这些工具时仍能查看 APK 内容、大小、SHA-256、DEX 和 ABI。工具补齐后重新导入同一 APK 可补全字段。请参阅[工具说明](docs/tools.md)。
 
 导入后，在「文件」页左侧切换「原始 APK」「反编译 Java」和「Smali / 资源」。首次打开反编译视图时，可在该视图中启动对应的工具。打开文件时，编辑器标签会显示文件来源。导入后即可在 APK 文件树点击 `AndroidManifest.xml`，或点击「查看清单」打开只读预览。完成 Smali / 资源解码后，同一入口可打开可编辑的工作副本。Java 和原始 APK 条目以只读方式打开。解码后的 Smali、清单和文本资源可在 Monaco 中编辑。反编译视图支持按路径筛选或搜索文件内容，Java 结果可导出到所选目录。反编译使用后台任务，底部显示日志，也可取消。结果按 APK 的 SHA-256 缓存，重开历史工作区即可继续查看。
 
-常规源码构建使用本机的 JADX 和 Apktool，可通过「外部工具」选择。GitHub 发布包使用外部工具，运行 JADX 和 Apktool 需要本机 JDK。详见[外部工具](docs/tools.md)。
+自 1.0.1 起，Apple Silicon 本地打包内置 JADX、Apktool、Java 运行时、所需的 Android SDK Build Tools 和 ADB。开发模式与已发布的 1.0.0 使用本机配置的工具。Ghidra 可在「SO / Ghidra」中配置。
 
 资源管理器右上角的「全局搜索」同时查询原始 APK 和已生成视图的路径，以及 Java、Smali 和解码资源中的文本。尚未生成的视图会在搜索结果中单独提示。点击命中项会打开对应来源的标签并定位到文件树或匹配行。
 

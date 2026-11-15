@@ -30,6 +30,16 @@ test('desktop opens, imports a signed APK, renders Monaco, handles drops and rem
     await writeFile(legacyAi, 'legacy settings fixture')
     let page = await launch()
     await page.getByRole('heading', { name: '打开你的第一个 APK' }).waitFor()
+    if (process.env.APKFLUX_TEST_BUNDLED === '1') {
+      const tools = await page.evaluate(() => window.apkflux.tools())
+      assert.ok(tools.ok)
+      for (const name of ['java', 'jadx', 'apktool', 'aapt2', 'zipalign', 'apksigner', 'adb']) {
+        const tool = tools.data.find(tool => tool.name === name)
+        assert.equal(tool?.source, 'bundled', name)
+        assert.match(tool.path, /\/Contents\/Resources\/tools\/darwin-arm64\//, name)
+        assert.ok(tool.version, name)
+      }
+    }
     assert.deepEqual(await page.evaluate(() => Object.keys(window.apkflux).filter(key => /ai$/i.test(key) || key === 'aiSettings')), [])
     if (process.env.APKFLUX_SCREENSHOT_DIR) await page.screenshot({ path: join(process.env.APKFLUX_SCREENSHOT_DIR, 'welcome.png') })
     const preferences = await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].webContents.getLastWebPreferences())
