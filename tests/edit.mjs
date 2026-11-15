@@ -100,6 +100,20 @@ test('edits decoded files, saves, compares, protects unsaved work and preserves 
     await openPath(smali)
     await text('APKFLUX_TEST_EDIT').waitFor()
 
+    await app.evaluate(({ dialog }) => {
+      dialog.showOpenDialog = () => new Promise(resolve => { global.finishApkPicker = resolve })
+    })
+    await page.getByRole('button', { name: '导入 APK', exact: true }).click()
+    await page.getByText('正在切换工作区…', { exact: true }).waitFor()
+    const smaliBefore = await text('APKFLUX_TEST_EDIT').textContent()
+    await page.locator('.monaco-editor:visible .view-line').first().click()
+    await page.keyboard.insertText('APKFLUX_TEST_BLOCKED_DRAFT')
+    assert.equal(await text('APKFLUX_TEST_EDIT').textContent(), smaliBefore)
+    assert.equal(await page.getByRole('button', { name: '撤销', exact: true }).isDisabled(), true)
+    await app.evaluate(() => global.finishApkPicker({ canceled: true, filePaths: [] }))
+    await page.getByText('已保存', { exact: true }).waitFor()
+    assert.equal(await page.getByRole('button', { name: '撤销', exact: true }).isEnabled(), true)
+
     if (strings) {
       await openPath(strings)
       await append('<!-- APKFLUX_TEST_RESOURCE -->')

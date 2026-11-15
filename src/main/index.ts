@@ -4,7 +4,6 @@ import { basename, join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { channels, type AnalysisReport, type DecodeKind, type Reply, type ToolName, type ToolStatus } from '../shared/api'
 import { Analyzer, renderReport } from './analysis'
-import { Updates } from './updates'
 import { NativeAnalyzer } from './native'
 import { Decoder } from './decode'
 import { Builder } from './build'
@@ -15,7 +14,7 @@ import { isNativeLibrary } from '../shared/native-library'
 
 let window: BrowserWindow | null = null
 let stopping = false
-let closeIntent: 'window' | 'app' | 'update' | undefined
+let closeIntent: 'window' | 'app' | undefined
 let canClose = false
 let closeGuardReady = false
 const shutdown = new AbortController()
@@ -25,18 +24,17 @@ const dev = !app.isPackaged ? process.env.APKFLUX_DEV_URL : undefined
 const targetUrl = dev ? new URL(dev).href : pathToFileURL(targetFile).href
 const tasks = new ImportTasks((event) => { if (window && !window.isDestroyed()) window.webContents.send(channels.task, event) })
 
-function requestClose(intent: 'window' | 'app' | 'update') {
+function requestClose(intent: 'window' | 'app') {
   if (!window) return
   if (closeIntent) {
-    if (intent !== 'window' && closeIntent !== 'update') closeIntent = intent
+    if (intent === 'app') closeIntent = intent
     return
   }
   closeIntent = intent
   window.webContents.send(channels.closeRequest)
 }
 
-function registerIpc(workspaces: Workspaces, tools: Tools, decoder: Decoder, builder: Builder, analyzer: Analyzer, updates: Updates,
-    native: NativeAnalyzer) {
+function registerIpc(workspaces: Workspaces, tools: Tools, decoder: Decoder, builder: Builder, analyzer: Analyzer, native: NativeAnalyzer) {
   function handle<T>(channel: string, action: (...params: unknown[]) => Promise<T> | T) {
     ipcMain.handle(channel, async (event: IpcMainInvokeEvent, ...args: unknown[]): Promise<Reply<T>> => {
       try {
@@ -142,8 +140,7 @@ function registerIpc(workspaces: Workspaces, tools: Tools, decoder: Decoder, bui
     if (!allow) return
     canClose = true
     setImmediate(() => {
-      if (intent === 'update') updates.install()
-      else if (intent === 'app') app.quit()
+      if (intent === 'app') app.quit()
       else window?.close()
     })
   })
@@ -223,14 +220,7 @@ function registerIpc(workspaces: Workspaces, tools: Tools, decoder: Decoder, bui
     await writeFile(result.filePath, renderReport(report, format), { flag: 'wx', mode: 0o600 })
     return result.filePath
   })
-  handle(channels.updateState, () => updates.current())
   handle(channels.openReleases, () => shell.openExternal('https://github.com/wzebbin/ApkFlux/releases/latest'))
-  handle(channels.checkUpdate, () => updates.check())
-  handle(channels.downloadUpdate, () => updates.download())
-  handle(channels.applyUpdate, () => {
-    if (updates.current().status !== 'ready') throw new Error('没有可安装的更新。')
-    requestClose('update')
-  })
   handle(channels.manageDevice, async (id, serial, action) => {
     const project = await workspaces.open(string(id, 64))
     if (!project.packageName || !window) throw new Error('未能读取当前 APK 的包名。')
@@ -272,7 +262,7 @@ function registerIpc(workspaces: Workspaces, tools: Tools, decoder: Decoder, bui
     const statuses = []
     for (const name of toolNames) {
       if (shutdown.signal.aborted) break
-      statuses.push(await tools.status(name, shutdown.signal).catch(() => ({ name, path: null, source: null, version: null })))
+      statuses.push(await tools.status(name, shutdown.signal))
     }
     return statuses
   }
@@ -339,7 +329,7 @@ else {
     await builder.init()
     const native = new NativeAnalyzer(join(base, 'native-v1'), tools)
     await native.init()
-    registerIpc(workspaces, tools, decoder, builder, new Analyzer(tools, decoder), new Updates(), native)
+    registerIpc(workspaces, tools, decoder, builder, new Analyzer(tools, decoder), native)
     const menu: MenuItemConstructorOptions[] = [
       ...(process.platform === 'darwin' ? [{ role: 'appMenu' as const }] : []),
       { label: '文件', submenu: [{ label: '导入 APK…', accelerator: 'CmdOrCtrl+O', click: () => window?.webContents.send(channels.openRequest) }, { role: 'close' }] },

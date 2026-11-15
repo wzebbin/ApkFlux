@@ -66,4 +66,4 @@ version=$(node -p "require('./package.json').version")
   shasum -a 256 "ApkFlux-$version-mac-arm64.dmg" > SHA256SUMS.txt)
 ```
 
-挂载 DMG，确认应用版本及 arm64 架构，并验证安装和启动。将对应源码提交和版本标签推送到 GitHub，在 Releases 上传本地生成的 DMG 与 `SHA256SUMS.txt`，使用 `docs/github-release.md` 中的说明发布。官网的下载按钮指向最新发布。Apple Silicon 免费分发使用临时签名，无 Apple 公证。用户从「设置 → 应用更新」进入 GitHub Releases 手动安装新版本。
+挂载 DMG，确认应用版本及 arm64 架构，并验证安装和启动。将对应源码提交和版本标签推送到 GitHub，在 Releases 上传本地生成的 DMG 与 `SHA256SUMS.txt`，使用 `docs/github-release.md` 中的说明发布。公开发布后，同步更新 README 与官网的下载链接、公开版本号、文件大小及工具说明。Apple Silicon 免费分发使用临时签名，无 Apple 公证。用户从「设置 → 应用更新」进入 GitHub Releases 手动安装新版本。

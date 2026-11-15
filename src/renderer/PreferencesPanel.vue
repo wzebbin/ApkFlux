@@ -1,44 +1,16 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
 import { ElButton } from 'element-plus'
-import type { Reply, UpdateState } from '../shared/api'
 import { usePreferences } from './preferences'
 
 const prefs = usePreferences()
 const t = prefs.text
-const status = ref<UpdateState>()
-const busy = ref(false)
 const error = ref('')
-const messages: Record<UpdateState['status'], [string, string]> = {
-  unconfigured: ['在 GitHub 查看并手动安装新版本。', 'View and install new versions manually from GitHub.'],
-  idle: ['等待检查。', 'Ready to check.'],
-  checking: ['正在检查更新…', 'Checking for updates…'],
-  available: ['有新版本。', 'An update is available.'],
-  current: ['当前已是最新版本。', 'You are up to date.'],
-  downloading: ['正在下载更新…', 'Downloading update…'],
-  ready: ['更新已下载。', 'Update downloaded.'],
-  failed: ['无法获取更新，请检查发布服务。', 'Could not retrieve the update.'],
-}
-async function run(action: () => Promise<Reply<UpdateState>>) {
-  busy.value = true
-  error.value = ''
-  try {
-    const result = await action()
-    if (result.ok) status.value = result.data
-    else error.value = result.error
-  } finally { busy.value = false }
-}
-async function install() {
-  const result = await window.apkflux.applyUpdate()
-  if (!result.ok) error.value = result.error
-}
 async function openReleases() {
   error.value = ''
-  const result = await api.openReleases()
+  const result = await window.apkflux.openReleases()
   if (!result.ok) error.value = result.error
 }
-const api = window.apkflux
-onMounted(() => run(api.updateState))
 </script>
 
 <template>
@@ -53,12 +25,9 @@ onMounted(() => run(api.updateState))
       </label>
     </div>
     <h3>{{ t('应用更新', 'App updates') }}</h3>
-    <p v-if="status">{{ t(...messages[status.status]) }} {{ status.version }}</p>
+    <p>{{ t('在 GitHub 查看并手动安装新版本。', 'View and install new versions manually from GitHub.') }}</p>
     <div v-if="error" class="error-banner" role="alert">{{ error }}</div>
-    <ElButton v-if="status?.status === 'unconfigured'" @click="openReleases">{{ t('查看 GitHub 发布', 'View GitHub Releases') }}</ElButton>
-    <ElButton v-else :disabled="busy" @click="run(api.checkUpdate)">{{ t('检查更新', 'Check for updates') }}</ElButton>
-    <ElButton v-if="status?.status === 'available'" :disabled="busy" @click="run(api.downloadUpdate)">{{ t('下载更新', 'Download update') }}</ElButton>
-    <ElButton v-if="status?.status === 'ready'" :disabled="busy" @click="install">{{ t('安装更新并重启', 'Install and restart') }}</ElButton>
+    <ElButton @click="openReleases">{{ t('查看 GitHub 发布', 'View GitHub Releases') }}</ElButton>
     <slot />
   </section>
 </template>

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#171a20">
-  <meta name="description" content="ApkFlux 是面向 Apple Silicon Mac 的本地 Android APK 工作台。">
+  <meta name="description" content="ApkFlux 是面向 Apple Silicon Mac 的本地 Android APK 工作台，支持反编译、工作副本编辑、重建签名和版本对比。">
   <title>ApkFlux · 本地 Android APK 工作台</title>
   <link rel="icon" href="assets/icon.png">
   <link rel="stylesheet" href="style.css">
@@ -12,7 +12,7 @@
 <body>
   <header class="shell header">
     <a class="brand" href="./"><img src="assets/icon.png" alt="" width="34" height="34"> ApkFlux</a>
-    <nav aria-label="网站导航"><a href="#features">功能</a><a href="https://github.com/wzebbin/ApkFlux">GitHub</a></nav>
+    <nav aria-label="网站导航"><a href="#features">功能</a><a href="#install">安装</a><a href="https://github.com/wzebbin/ApkFlux">GitHub</a></nav>
   </header>
   <main class="shell">
     <section class="hero">
@@ -20,8 +20,14 @@
         <p class="platform">Apple Silicon macOS</p>
         <h1>Android APK<br>本地工作台</h1>
         <p class="summary">查看包信息、浏览反编译结果、编辑工作副本，并构建已签名的 APK。</p>
-        <a class="download" href="https://github.com/wzebbin/ApkFlux/releases/latest">免费下载 DMG</a>
-        <p class="install-note">使用临时签名，首次打开可能出现 macOS 验证提示。</p>
+        <div class="download-actions">
+          <a class="download" href="https://github.com/wzebbin/ApkFlux/releases/download/v1.0.0/ApkFlux-1.0.0-mac-arm64.dmg">免费下载 DMG</a>
+          <span class="release-meta">1.0.0 · 约 125 MB</span>
+        </div>
+        <div class="release-links">
+          <a href="https://github.com/wzebbin/ApkFlux/releases/tag/v1.0.0">发布说明</a>
+          <a href="https://github.com/wzebbin/ApkFlux/releases/download/v1.0.0/SHA256SUMS.txt">SHA-256 校验文件</a>
+        </div>
       </div>
       <figure class="preview"><img src="assets/workbench.png" width="1440" height="920" alt="ApkFlux 1.0.0 编辑器同时打开清单、原始资源和 Smali"></figure>
     </section>
@@ -32,6 +38,14 @@
         <article><h3>编辑和构建</h3><p>多标签保留各自的编辑状态。保存到工作副本后，可以重建、对齐、签名并验签。</p></article>
         <article><h3>分析与版本对比</h3><p>对比文件和权限，检查 SDK 与 SO，导出 HTML、JSON 或 CSV 报告。</p></article>
       </div>
+    </section>
+    <section id="install" class="install">
+      <h2>安装并打开第一个 APK</h2>
+      <ol>
+        <li>打开 DMG，将 ApkFlux 拖到「应用程序」。免费版使用临时签名，首次打开可能出现开发者验证提示。<a href="https://support.apple.com/zh-cn/102445">查看 Apple 的说明</a>。</li>
+        <li>拖入 APK，或点击「导入 APK」。1.0.0 可直接浏览包内文件。反编译和解码需要 Java、JADX 或 Apktool，验签与重建需要 Android SDK Build Tools。前往「设置 → 外部工具」配置。<a href="https://github.com/wzebbin/ApkFlux/blob/v1.0.0/docs/tools.md">查看工具配置</a>。</li>
+        <li>从「设置 → 应用更新」打开 GitHub 获取新版，退出 ApkFlux 后替换应用即可。</li>
+      </ol>
     </section>
   </main>
   <footer class="shell footer"><span>ApkFlux</span><a href="https://github.com/wzebbin/ApkFlux/releases">发布记录</a></footer>

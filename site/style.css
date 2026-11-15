@@ -15,7 +15,7 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; }
 .header, .footer { min-height: 72px; display: flex; align-items: center; justify-content: space-between; border-color: var(--border); }
 .header { border-bottom: 1px solid var(--border); }
 .brand { display: inline-flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 730; }
-.header nav { display: flex; gap: 26px; }
+.header nav { display: flex; gap: clamp(10px, 3vw, 26px); }
 .header nav a, .footer { color: var(--muted); }
 .header nav a:hover, .footer a:hover { color: var(--accent); }
 .hero { display: grid; grid-template-columns: minmax(270px, .75fr) minmax(0, 1.45fr); gap: clamp(24px, 4vw, 68px); align-items: center; padding-block: clamp(44px, 8vw, 108px); }
@@ -24,14 +24,20 @@ h1 { font-size: clamp(39px, 5vw, 72px); line-height: 1.12; letter-spacing: -.045
 .summary { max-width: 32em; margin: 23px 0; color: var(--muted); line-height: 1.75; }
 .download { display: inline-flex; align-items: center; min-height: 46px; padding: 0 19px; border-radius: 6px; background: var(--accent); color: #12241e; font-weight: 700; }
 .download:hover { background: #b5eedc; }
-.install-note { margin: 12px 0 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
+.download-actions, .release-links { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 15px; }
+.release-meta, .release-links { color: var(--muted); font-size: 13px; }
+.release-links { margin-top: 14px; }
+.release-links a, .install a { text-decoration: underline; text-underline-offset: 3px; }
+.release-links a:hover, .install a:hover { color: var(--accent); }
 .preview { margin: 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; box-shadow: 0 16px 45px #090d1466; }
 .preview img { width: 100%; height: auto; display: block; }
-.features { border-top: 1px solid var(--border); padding-block: 36px 48px; }
-.features h2 { margin-top: 0; font-size: clamp(20px, 2.1vw, 30px); }
+.features, .install { border-top: 1px solid var(--border); padding-block: 36px 48px; }
+.features h2, .install h2 { margin-top: 0; font-size: clamp(20px, 2.1vw, 30px); }
 .feature-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px; }
 .feature-grid article { border-top: 1px solid var(--border); }
 .feature-grid p { color: var(--muted); line-height: 1.7; }
+.install ol { max-width: 75ch; margin: 0; padding-left: 24px; color: var(--muted); line-height: 1.75; }
+.install li + li { margin-top: 10px; }
 .footer { border-top: 1px solid var(--border); font-size: 14px; }
 @media (max-width: 860px) {
   .hero { grid-template-columns: minmax(0, 1fr); }

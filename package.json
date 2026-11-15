@@ -27,7 +27,6 @@
   },
   "dependencies": {
     "crc-32": "^1.2.2",
-    "electron-updater": "^6.8.11",
     "yauzl": "^3.4.0"
   },
   "devDependencies": {

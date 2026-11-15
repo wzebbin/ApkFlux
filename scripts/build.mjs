@@ -5,7 +5,7 @@ import { spawn } from 'node:child_process'
 const desktop = {
   entryPoints: { 'main/index': 'src/main/index.ts', 'preload/index': 'src/preload/index.ts' },
   bundle: true,
-  external: ['electron', 'electron-updater'],
+  external: ['electron'],
   loader: { '.java': 'text' },
   platform: 'node',
   target: 'node22',

@@ -265,7 +265,15 @@ export class Tools {
     return tool ? runProcess(tool, args, signal, timeoutMs, options) : null
   }
 
-  async status(name: ToolName, signal?: AbortSignal): Promise<ToolStatus> {
+  status(name: ToolName, signal?: AbortSignal): Promise<ToolStatus> {
+    return this.probe(name, signal).catch((error: unknown) => {
+      const path = this.custom[name] ?? null
+      return { name, path, source: path ? 'custom' : null, version: null,
+        error: error instanceof Error ? error.message : String(error) }
+    })
+  }
+
+  private async probe(name: ToolName, signal?: AbortSignal): Promise<ToolStatus> {
     if (name === 'ghidra') {
       const install = await this.ghidra(signal)
       return { name, path: install?.path ?? null, source: install?.source ?? null, version: install?.java ? install.version : null }

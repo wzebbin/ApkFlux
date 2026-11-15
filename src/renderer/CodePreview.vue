@@ -25,7 +25,7 @@ languages.setMonarchTokensProvider('smali', {
 </script>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { editor } from 'monaco-editor/esm/vs/editor/editor.api.js'
 import 'monaco-editor/esm/vs/editor/contrib/find/browser/findController.js'
 import 'monaco-editor/esm/vs/basic-languages/xml/xml.contribution.js'
@@ -33,6 +33,7 @@ import 'monaco-editor/esm/vs/basic-languages/java/java.contribution.js'
 import { usePreferences } from './preferences'
 
 const props = withDefaults(defineProps<{ path: string; value: string; tabId?: number; location?: { line: number }; original?: string; draft?: string; comparing?: boolean; readOnly?: boolean; visible?: boolean }>(), { visible: true })
+const readOnly = computed(() => props.readOnly || props.original === undefined)
 const emit = defineEmits<{ change: [string]; save: [] }>()
 const prefs = usePreferences()
 const host = ref<HTMLElement>()
@@ -66,11 +67,14 @@ function goToLine() {
 }
 
 function history(command: 'undo' | 'redo') {
+  if (readOnly.value) return
   if (command === 'undo') void model?.undo()
   else void model?.redo()
   view?.focus()
 }
-function replace() { void view?.getAction('editor.action.startFindReplaceAction')?.run() }
+function replace() {
+  if (!readOnly.value) void view?.getAction('editor.action.startFindReplaceAction')?.run()
+}
 defineExpose({ tabId: props.tabId, history, replace })
 
 function disposeDiff() {
@@ -113,7 +117,7 @@ onMounted(() => {
     'editor.background': '#181a1f', 'editorLineNumber.foreground': '#858d9a', 'editor.lineHighlightBackground': '#22252b',
   } })
   view = editor.create(host.value, {
-    theme: prefs.theme === 'dark' ? 'apkflux' : 'vs', automaticLayout: true, readOnly: props.readOnly || props.original === undefined, domReadOnly: props.readOnly || props.original === undefined, minimap: { enabled: false },
+    theme: prefs.theme === 'dark' ? 'apkflux' : 'vs', automaticLayout: true, readOnly: readOnly.value, domReadOnly: readOnly.value, minimap: { enabled: false },
     fontFamily: 'SFMono-Regular, Consolas, monospace', fontSize: 13, lineHeight: 22, scrollBeyondLastLine: false,
     padding: { top: 16 }, ariaLabel: 'APK 文件预览',
   })
@@ -121,7 +125,7 @@ onMounted(() => {
   showDiff(props.comparing)
   view.onDidChangeModelContent(() => { if (props.original !== undefined && model) emit('change', model.getValue()) })
   view.onKeyDown((event) => {
-    if (props.original !== undefined && (event.ctrlKey || event.metaKey) && event.browserEvent.key.toLowerCase() === 's') {
+    if (!readOnly.value && (event.ctrlKey || event.metaKey) && event.browserEvent.key.toLowerCase() === 's') {
       event.preventDefault()
       event.stopPropagation()
       emit('save')
@@ -129,6 +133,7 @@ onMounted(() => {
   })
 })
 watch(() => [props.path, props.value], show)
+watch(readOnly, (locked) => view?.updateOptions({ readOnly: locked, domReadOnly: locked }))
 watch(() => props.location, goToLine, { flush: 'post' })
 watch(() => prefs.theme, (theme) => editor.setTheme(theme === 'dark' ? 'apkflux' : 'vs'))
 onBeforeUnmount(() => { disposeDiff(); view?.dispose(); model?.dispose() })

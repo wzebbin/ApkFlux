@@ -446,9 +446,10 @@ onBeforeUnmount(() => { observer.disconnect(); unlisten?.() })
               <ElButton size="small" :disabled="store.loadingTools" @click="store.refreshTools()">{{ t('重新检测', 'Rescan tools') }}</ElButton>
               <p v-if="store.loadingTools">{{ t('正在检测工具…', 'Detecting tools…') }}</p>
               <article v-for="tool in store.tools" :key="tool.name" class="tool-item">
-                <div><strong>{{ tool.name }}</strong><span :class="{ detected: tool.version }">{{ tool.version ? '可用' : tool.path ? '未确认版本' : '未检测到' }}</span></div>
+                <div><strong>{{ tool.name }}</strong><span :class="{ detected: tool.version }">{{ tool.error && tool.source === 'custom' ? t('手动配置不可用', 'Custom configuration unavailable') : tool.version ? t('可用', 'Available') : tool.path ? t('未确认版本', 'Version unconfirmed') : t('未检测到', 'Not found') }}</span></div>
                 <p v-if="tool.version">{{ tool.version }}</p><p v-if="tool.path" :title="tool.path">{{ tool.source ? sourceLabel[tool.source] : '' }} · {{ tool.path }}</p>
                 <ElButton size="small" @click="store.configureTool(tool.name)">选择路径</ElButton>
+                <p v-if="tool.error">{{ tool.error }}</p>
                 <ElButton v-if="tool.source === 'custom'" size="small" text @click="store.configureTool(tool.name, true)">重置</ElButton>
               </article>
             </div>
@@ -485,14 +486,14 @@ onBeforeUnmount(() => { observer.disconnect(); unlisten?.() })
                 </button>
                 <button class="icon-button tab-close" :title="t(`关闭 ${fileName(tab.path)}`, `Close ${fileName(tab.path)}`)"
                   :aria-label="tab.id === store.activeTabId ? t('关闭文件', 'Close file') : t(`关闭 ${fileName(tab.path)}`, `Close ${fileName(tab.path)}`)"
-                  @click="store.closeFile(tab.id)"><Glyph name="close" :size="13" /></button>
+                  :disabled="store.replacingWorkspace" @click="store.closeFile(tab.id)"><Glyph name="close" :size="13" /></button>
               </div>
             </div>
             <div v-else class="editor-tab overview-tab">
               <Glyph name="brand" :size="15" />
               <span class="tab-name">{{ store.workspace ? t('工作区概览', 'Workspace overview') : t('开始使用', 'Get started') }}</span>
             </div>
-            <span v-if="store.activeTab" class="tab-hint" :class="{ 'is-dirty': store.dirty }">{{ store.activeTab.edit ? (store.dirty ? t('● 未保存', '● Unsaved') : t('已保存', 'Saved')) : t('只读预览', 'Read-only') }}</span>
+            <span v-if="store.activeTab" class="tab-hint" :class="{ 'is-dirty': store.dirty }">{{ store.replacingWorkspace ? t('正在切换工作区…', 'Switching workspace…') : store.activeTab.edit ? (store.dirty ? t('● 未保存', '● Unsaved') : t('已保存', 'Saved')) : t('只读预览', 'Read-only') }}</span>
           </div>
           <div v-if="!store.workspace" class="welcome">
             <div class="welcome-inner">
@@ -525,16 +526,16 @@ onBeforeUnmount(() => { observer.disconnect(); unlisten?.() })
                 <ElButton size="small" @click="openNative(store.activePath)">{{ t('用 Ghidra 查看', 'Open in Ghidra') }}</ElButton>
               </div>
               <div v-else-if="store.activeTab.edit" class="file-actions" aria-label="文件编辑">
-                <ElButton size="small" type="primary" :disabled="!store.dirty || store.activeTab.saving" @click="store.saveFile()">{{ t('保存文件', 'Save file') }}</ElButton>
+                <ElButton size="small" type="primary" :disabled="store.replacingWorkspace || !store.dirty || store.activeTab.saving" @click="store.saveFile()">{{ t('保存文件', 'Save file') }}</ElButton>
                 <template v-if="store.activeTab.edit.format === 'text'">
-                  <ElButton size="small" :disabled="store.activeTab.comparing" @click="codeEditor?.history('undo')">{{ t('撤销', 'Undo') }}</ElButton>
-                  <ElButton size="small" :disabled="store.activeTab.comparing" @click="codeEditor?.history('redo')">{{ t('重做', 'Redo') }}</ElButton>
-                  <ElButton size="small" :disabled="store.activeTab.comparing" @click="codeEditor?.replace()">{{ t('查找与替换', 'Find and replace') }}</ElButton>
+                  <ElButton size="small" :disabled="store.replacingWorkspace || store.activeTab.comparing" @click="codeEditor?.history('undo')">{{ t('撤销', 'Undo') }}</ElButton>
+                  <ElButton size="small" :disabled="store.replacingWorkspace || store.activeTab.comparing" @click="codeEditor?.history('redo')">{{ t('重做', 'Redo') }}</ElButton>
+                  <ElButton size="small" :disabled="store.replacingWorkspace || store.activeTab.comparing" @click="codeEditor?.replace()">{{ t('查找与替换', 'Find and replace') }}</ElButton>
                 </template>
                 <template v-else>
-                  <ElButton size="small" :disabled="store.activeTab.saving" @click="store.replaceImage()">{{ t('替换图片…', 'Replace image…') }}</ElButton>
-                  <ElButton size="small" :disabled="store.activeTab.imageCursor === 0" @click="store.moveImageHistory(-1)">{{ t('撤销', 'Undo') }}</ElButton>
-                  <ElButton size="small" :disabled="store.activeTab.imageCursor >= store.activeTab.imageHistory.length - 1" @click="store.moveImageHistory(1)">{{ t('重做', 'Redo') }}</ElButton>
+                  <ElButton size="small" :disabled="store.replacingWorkspace || store.activeTab.saving" @click="store.replaceImage()">{{ t('替换图片…', 'Replace image…') }}</ElButton>
+                  <ElButton size="small" :disabled="store.replacingWorkspace || store.activeTab.imageCursor === 0" @click="store.moveImageHistory(-1)">{{ t('撤销', 'Undo') }}</ElButton>
+                  <ElButton size="small" :disabled="store.replacingWorkspace || store.activeTab.imageCursor >= store.activeTab.imageHistory.length - 1" @click="store.moveImageHistory(1)">{{ t('重做', 'Redo') }}</ElButton>
                 </template>
                 <ElButton size="small" @click="store.activeTab.comparing = !store.activeTab.comparing">{{ store.activeTab.comparing ? t('返回编辑', 'Back to editor') : t('查看差异', 'View changes') }}</ElButton>
               </div>
@@ -543,7 +544,7 @@ onBeforeUnmount(() => { observer.disconnect(); unlisten?.() })
               <div v-if="tab.comparing" class="comparison-labels"><span>{{ t('解码原件', 'Decoded original') }}</span><span>{{ t('当前工作副本', 'Working copy') }}</span></div>
               <div v-if="tab.loading" class="preview-message">正在读取文件…</div>
               <CodePreview v-else-if="tab.preview?.format === 'text'" ref="codeEditors" :tab-id="tab.id" :path="tab.path" :value="tab.preview.value" :location="tab.location"
-                :visible="workspaceView === 'editor' && tab.id === store.activeTabId" :original="tab.edit?.original" :draft="tab.draft"
+                :visible="workspaceView === 'editor' && tab.id === store.activeTabId" :original="tab.edit?.original" :draft="tab.draft" :read-only="store.replacingWorkspace"
                 :comparing="tab.comparing" @change="tab.draft = $event" @save="store.saveFile(tab.id)" />
               <div v-else-if="tab.preview?.format === 'image'" class="image-preview" :class="{ 'image-diff': tab.comparing }">
                 <img v-if="tab.comparing && tab.edit" :src="tab.edit.original" :alt="t('解码原件', 'Decoded original')" />

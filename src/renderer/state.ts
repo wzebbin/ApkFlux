@@ -49,7 +49,7 @@ export const useWorkbench = defineStore('workbench', () => {
   const notice = ref('')
   let generation = 0
   let nextTabId = 0
-  let replacingWorkspace = false
+  const replacingWorkspace = ref(false)
   const running = computed(() => events.value.at(-1)?.status === 'running')
 
   const unsubscribe = window.apkflux.onTask((event) => {
@@ -60,7 +60,7 @@ export const useWorkbench = defineStore('workbench', () => {
   })
   onScopeDispose(unsubscribe)
   onScopeDispose(window.apkflux.onCloseRequest(() => {
-    void confirmTabs(replacingWorkspace ? undefined : tabs.value).then((allow) => window.apkflux.closeDecision(allow))
+    void confirmTabs(replacingWorkspace.value ? undefined : tabs.value).then((allow) => window.apkflux.closeDecision(allow))
   }))
 
   async function refreshRecent() {
@@ -89,23 +89,23 @@ export const useWorkbench = defineStore('workbench', () => {
 
   async function importApk(file?: File) {
     if (pending.value || running.value) return
-    pending.value = replacingWorkspace = true
+    pending.value = replacingWorkspace.value = true
     error.value = ''
     try {
       if (!await confirmTabs(tabs.value)) return
       await activate(unwrap(await (file ? window.apkflux.dropApk(file) : window.apkflux.selectApk())))
       await refreshRecent()
-    } catch (e) { error.value = errorText(e) } finally { pending.value = replacingWorkspace = false }
+    } catch (e) { error.value = errorText(e) } finally { pending.value = replacingWorkspace.value = false }
   }
 
   async function reopen(id: string) {
     if (pending.value || running.value) return
-    pending.value = replacingWorkspace = true
+    pending.value = replacingWorkspace.value = true
     error.value = ''
     try {
       if (await confirmTabs(tabs.value)) await activate(unwrap(await window.apkflux.open(id)))
     }
-    catch (e) { error.value = errorText(e) } finally { pending.value = replacingWorkspace = false }
+    catch (e) { error.value = errorText(e) } finally { pending.value = replacingWorkspace.value = false }
   }
 
   const isOpen = (tab: FileTab) => tabs.value.includes(tab)
@@ -116,7 +116,7 @@ export const useWorkbench = defineStore('workbench', () => {
 
   async function closeFile(id = activeTabId.value) {
     const tab = tabs.value.find(item => item.id === id)
-    if (!tab || replacingWorkspace || !await confirmTabs([tab])) return
+    if (!tab || replacingWorkspace.value || !await confirmTabs([tab])) return
     const index = tabs.value.indexOf(tab)
     if (index < 0) return
     tabs.value.splice(index, 1)
@@ -125,7 +125,7 @@ export const useWorkbench = defineStore('workbench', () => {
 
   async function showFile(path: string, source: FileSource = 'archive', line?: number, keepSource = false) {
     const project = workspace.value
-    if (!project || replacingWorkspace || confirming) return false
+    if (!project || replacingWorkspace.value || confirming) return false
     const manifest = source === 'archive' && path === 'AndroidManifest.xml'
     if (manifest && decoded.value.android && !keepSource) source = 'android'
     const existing = tabs.value.find(tab => tab.path === path && tab.source === source)
@@ -209,10 +209,10 @@ export const useWorkbench = defineStore('workbench', () => {
   async function replaceImage() {
     const project = workspace.value
     const tab = activeTab.value
-    if (!project || tab?.edit?.format !== 'image') return
+    if (!project || replacingWorkspace.value || tab?.edit?.format !== 'image') return
     try {
       const value = unwrap(await window.apkflux.pickImage(project.id, tab.path))
-      if (value !== null && isOpen(tab) && value !== tab.draft) {
+      if (value !== null && !replacingWorkspace.value && isOpen(tab) && value !== tab.draft) {
         tab.imageHistory = [...tab.imageHistory.slice(0, tab.imageCursor + 1), value].slice(-8)
         tab.imageCursor = tab.imageHistory.length - 1
         tab.draft = value
@@ -221,7 +221,7 @@ export const useWorkbench = defineStore('workbench', () => {
   }
   function moveImageHistory(direction: -1 | 1) {
     const tab = activeTab.value
-    if (!tab) return
+    if (!tab || replacingWorkspace.value) return
     const index = tab.imageCursor + direction
     if (index >= 0 && index < tab.imageHistory.length) {
       tab.imageCursor = index
@@ -295,6 +295,6 @@ export const useWorkbench = defineStore('workbench', () => {
     try { unwrap(await window.apkflux.cancel()) } catch (e) { error.value = errorText(e) }
   }
   return { workspace, recent, tools, events, tabs, activeTab, activeTabId, activePath, activeSource, decoded, icon, error, notice, pending, running, loadingTools,
-    dirty, hasUnsavedTabs, hasPendingEdits, selectTab, saveFile, replaceImage, moveImageHistory,
+    dirty, hasUnsavedTabs, hasPendingEdits, replacingWorkspace, selectTab, saveFile, replaceImage, moveImageHistory,
     refreshRecent, importApk, reopen, showFile, closeFile, decode, activeDecode, decodeIssues, cancelDecode, exportJava, refreshTools, configureTool, cancel }
 })

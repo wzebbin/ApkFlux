@@ -13,6 +13,8 @@ test('desktop opens, imports a signed APK, renders Monaco, handles drops and rem
   const dir = await mkdtemp(join(tmpdir(), 'apkflux-desktop-'))
   const profile = join(dir, 'profile')
   const legacyAi = join(profile, 'ai.json')
+  const toolsSettings = join(profile, 'tools.json')
+  const missingJadx = join(dir, 'moved', 'jadx.jar')
   let app
   const pageProblems = []
   const launch = async () => {
@@ -28,8 +30,18 @@ test('desktop opens, imports a signed APK, renders Monaco, handles drops and rem
   try {
     await mkdir(profile)
     await writeFile(legacyAi, 'legacy settings fixture')
+    await writeFile(toolsSettings, JSON.stringify({ jadx: missingJadx }))
     let page = await launch()
     await page.getByRole('heading', { name: '打开你的第一个 APK' }).waitFor()
+    await page.getByRole('button', { name: '设置', exact: true }).click()
+    await page.getByRole('button', { name: '外部工具', exact: true }).click()
+    const jadx = page.locator('.tool-item').filter({ has: page.getByText('jadx', { exact: true }) })
+    await jadx.getByText('手动配置不可用', { exact: true }).waitFor()
+    assert.match(await jadx.textContent(), /moved[/\\]jadx\.jar/)
+    await jadx.getByRole('button', { name: '重置', exact: true }).click()
+    await jadx.getByRole('button', { name: '重置', exact: true }).waitFor({ state: 'hidden' })
+    assert.deepEqual(JSON.parse(await readFile(toolsSettings, 'utf8')), {})
+    await page.getByRole('button', { name: '返回工作台', exact: true }).click()
     if (process.env.APKFLUX_TEST_BUNDLED === '1') {
       const tools = await page.evaluate(() => window.apkflux.tools())
       assert.ok(tools.ok)
@@ -94,18 +106,15 @@ test('desktop opens, imports a signed APK, renders Monaco, handles drops and rem
     await page.getByRole('button', { name: '关闭 APK 信息' }).click()
     await inspector.waitFor({ state: 'hidden' })
     await page.getByRole('button', { name: '设置', exact: true }).click()
-    const updateState = await page.evaluate(() => window.apkflux.updateState())
-    if (updateState.ok && updateState.data.status === 'unconfigured') {
-      await app.evaluate(({ shell }) => {
-        const original = shell.openExternal
-        shell.openExternal = async (url) => {
-          global.apkfluxTestReleaseUrl = url
-          shell.openExternal = original
-        }
-      })
-      await page.getByRole('button', { name: '查看 GitHub 发布', exact: true }).click()
-      assert.equal(await app.evaluate(() => global.apkfluxTestReleaseUrl), 'https://github.com/wzebbin/ApkFlux/releases/latest')
-    }
+    await app.evaluate(({ shell }) => {
+      const original = shell.openExternal
+      shell.openExternal = async (url) => {
+        global.apkfluxTestReleaseUrl = url
+        shell.openExternal = original
+      }
+    })
+    await page.getByRole('button', { name: '查看 GitHub 发布', exact: true }).click()
+    assert.equal(await app.evaluate(() => global.apkfluxTestReleaseUrl), 'https://github.com/wzebbin/ApkFlux/releases/latest')
     await page.getByLabel('Language').selectOption('en')
     await page.getByRole('button', { name: 'Back to workbench', exact: true }).click()
     await page.getByRole('button', { name: 'Original APK view' }).waitFor()

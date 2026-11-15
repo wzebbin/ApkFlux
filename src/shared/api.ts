@@ -53,7 +53,6 @@ export type AnalysisReport = {
   coverage?: Record<DecodeKind, { baseline: boolean; current: boolean }>
 }
 export type ReportFormat = 'json' | 'html' | 'csv'
-export type UpdateState = { status: 'unconfigured' | 'idle' | 'checking' | 'available' | 'current' | 'downloading' | 'ready' | 'failed'; version: string | null }
 export type DecodeKind = 'java' | 'android'
 export type FileSource = 'archive' | DecodeKind
 export type DecodedFile = { path: string; bytes: number }
@@ -63,7 +62,7 @@ export type SourceSearch = { matches: SourceMatch[]; limited: boolean }
 export type WorkspaceSearchHit = { source: FileSource; path: string; line?: number; text?: string }
 export type WorkspaceSearch = { hits: WorkspaceSearchHit[]; missing: DecodeKind[]; limited: boolean }
 export type ToolName = 'java' | 'aapt2' | 'apksigner' | 'zipalign' | 'adb' | 'jadx' | 'apktool' | 'ghidra'
-export type ToolStatus = { name: ToolName; path: string | null; source: 'custom' | 'bundled' | 'sdk' | 'path' | null; version: string | null }
+export type ToolStatus = { name: ToolName; path: string | null; source: 'custom' | 'bundled' | 'sdk' | 'path' | null; version: string | null; error?: string }
 export type TaskStatus = 'running' | 'done' | 'failed' | 'cancelled'
 export type TaskEvent = {
   id: string
@@ -102,11 +101,7 @@ export interface DesktopApi {
   exportAnalysis(format: ReportFormat): Promise<Reply<string | null>>
   analyzeNative(id: string, path: string): Promise<Reply<NativeLibrary>>
   nativeCode(id: string, path: string, address: string): Promise<Reply<NativeCode>>
-  updateState(): Promise<Reply<UpdateState>>
   openReleases(): Promise<Reply<void>>
-  checkUpdate(): Promise<Reply<UpdateState>>
-  downloadUpdate(): Promise<Reply<UpdateState>>
-  applyUpdate(): Promise<Reply<void>>
   manageDevice(id: string, serial: string, action: 'launch' | 'uninstall'): Promise<Reply<void>>
   tools(): Promise<Reply<ToolStatus[]>>
   chooseTool(name: ToolName): Promise<Reply<boolean>>
@@ -128,8 +123,7 @@ export const channels = {
   buildHistory: 'build:history', devices: 'adb:devices', installBuild: 'adb:install',
   analyze: 'analysis:run', exportAnalysis: 'analysis:export',
   analyzeNative: 'native:analyze', nativeCode: 'native:code',
-  updateState: 'update:state', openReleases: 'update:open-releases',
-  checkUpdate: 'update:check', downloadUpdate: 'update:download', applyUpdate: 'update:apply',
+  openReleases: 'update:open-releases',
   manageDevice: 'adb:manage',
   copyHash: 'workspace:copy-hash', cancel: 'task:cancel', task: 'task:event', openRequest: 'ui:open-request',
 } as const
